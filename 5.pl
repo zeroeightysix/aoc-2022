@@ -36,6 +36,10 @@ input(C, M) --> crates_filt(C), moves(M).
 split(At, L, L1, L2) :-
   length(L1, At),
   append(L1, L2, L).
+
+replace(Idx, L1, E2, L2) :-
+  nth1(Idx, L1, _, R),
+  nth1(Idx, L2, E2, R).
   
 perform_rev((Q,F,T), C, Cout) :-
   % 'Remove' the blocks from the 'F'rom stack
@@ -48,10 +52,6 @@ perform_rev((Q,F,T), C, Cout) :-
   append(Blocks, TStack, TCompound),
   replace(T, CIntermediary, TCompound, Cout).
 
-replace(Idx, L1, E2, L2) :-
-  nth1(Idx, L1, _, R),
-  nth1(Idx, L2, E2, R).
-
 perform((Q,F,T), C, Cout) :-
   % 'Remove' the blocks from the 'F'rom stack
   nth1(F, C, FStack),
@@ -62,15 +62,10 @@ perform((Q,F,T), C, Cout) :-
   append(Blocks, TStack, TCompound),
   replace(T, CIntermediary, TCompound, Cout).
 
-proc(C, [], C).
-proc(C, [M|Ms], Out) :-
-  perform(M, C, C2),
-  proc(C2, Ms, Out).
-  
-proc_rev(C, [], C).
-proc_rev(C, [M|Ms], Out) :-
-  perform_rev(M, C, C2),
-  proc_rev(C2, Ms, Out).
+proc(_, C, [], C).
+proc(Method, C, [M|Ms], Out) :-
+  call(Method, M, C, C2),
+  proc(Method, C2, Ms, Out).
 
 head([H|_], H).
 
@@ -81,5 +76,5 @@ solve(Method) :-
   atom_string(Ats, Msg),
   writeln(Msg).
 
-p1 :- solve(proc_rev).
-p2 :- solve(proc).
+p1 :- solve(proc(perform_rev)).
+p2 :- solve(proc(perform)).
